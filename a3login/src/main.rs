@@ -18,8 +18,10 @@ fn run() -> Result<(), Box<dyn Error>> {
         let record = result?;
 
         let username = &record[0];
-        let password_hash  = PasswordHash::new(&record[1]).unwrap(); // fix the unwrap here
-
+        let password_hash  = PasswordHash::new(&record[1]).unwrap_or_else(|err| {
+            eprintln!("Failed to parse password hash: {:?}", err);
+            std::process::exit(1); 
+        });
         
         if username == login_input.username.trim() &&  Argon2::default().verify_password(login_input.password.trim().as_bytes(), &password_hash).is_ok() {
             println!{"Access granted!"};
@@ -44,7 +46,10 @@ fn read_input() -> String {
     let mut input = String::new();
     io::stdin()
         .read_line(&mut input)
-        .expect("cannot read user input");
+        .unwrap_or_else(|err| {
+            eprintln!("Error reading input: {}", err);
+            std::process::exit(1);
+        });
 
     input
 }
@@ -57,11 +62,11 @@ struct LoginInfo {
 impl LoginInfo {
     fn new() -> LoginInfo {
         print!("Enter username: ");
-        io::stdout().flush().unwrap(); // need to fix the unwrap here
+        _ = io::stdout().flush();
         let username = read_input();
 
         print!("Enter password: ");
-        io::stdout().flush().unwrap();
+        _ = io::stdout().flush();
         let password = read_input();
 
         LoginInfo { username, password }
