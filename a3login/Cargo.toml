@@ -1,3 +1,5 @@
+authors = ["Thomas Ely", "Jabreal Hasan", "Niaz Mehedi"]
+
 [package]
 name = "a3login"
 version = "0.1.0"
